@@ -121,6 +121,12 @@ func (d *Download) Start() error {
 		log.Println("Error ", err)
 	}
 
+	err := d.saveOutput()
+
+	if err != nil {
+		log.Print(err)
+	}
+
 	return nil
 }
 
@@ -141,7 +147,7 @@ func (d *Download) DownloadPart(jobs <-chan *DownloadPart, errors chan<- error) 
 		rangeValue := fmt.Sprintf("bytes=%d-%d", part.From, part.To)
 		req.Header.Add("Range", rangeValue)
 
-		dest := fmt.Sprintf("%s/%s/%s_%d", configloader.DestFolder, "/Temp/", d.Id, cursor)
+		dest := fmt.Sprintf("%s%s_%d", configloader.TempDir, d.Id, cursor)
 		out, err := os.Create(dest)
 		writer := &ProgressWriter{
 			part:   d.Parts[0],
@@ -172,7 +178,28 @@ func (d *Download) Debug() {
 }
 
 func (d *Download) Pause(cb func()) {
+}
 
+func (d *Download) saveOutput() error {
+	output, err := os.Create(d.Destination)
+	log.Println("Saving to ", d.Destination)
+	if err != nil {
+		return err
+	}
+	defer output.Close()
+
+	for p := range d.Parts {
+		filename := fmt.Sprintf("%s_%d", d.Id, p)
+		tempFile, err := os.Open(configloader.TempDir + filename)
+		if err != nil {
+			return err
+		}
+		defer tempFile.Close()
+
+		io.Copy(output, tempFile)
+	}
+
+	return nil
 }
 
 func getDestFileName(url, contentType, contentDisposition string) (string, error) {
@@ -193,5 +220,5 @@ func getDestFileName(url, contentType, contentDisposition string) (string, error
 		}
 	}
 
-	return configloader.DestFolder + "/Downloads/" + filename, nil
+	return configloader.DestFolder + filename, nil
 }

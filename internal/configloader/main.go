@@ -6,6 +6,7 @@ import (
 )
 
 var DestFolder = "./"
+var TempDir = "./"
 var MaxThreads int64 = 4
 
 func init() {
@@ -15,6 +16,11 @@ func init() {
 		panic(err)
 	}
 
-	DestFolder = homeDir
+	TempDir = homeDir + "/Temp/"
+	DestFolder = homeDir + "/Downloads/"
 	log.Println(homeDir)
 }
+
+// Create config if not present
+
+// Load Config
