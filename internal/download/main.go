@@ -10,6 +10,7 @@ import (
 	"mime"
 	"net/http"
 	"os"
+	"path"
 	"strconv"
 	"strings"
 	"sync"
@@ -147,7 +148,8 @@ func (d *Download) DownloadPart(jobs <-chan *DownloadPart, errors chan<- error) 
 		rangeValue := fmt.Sprintf("bytes=%d-%d", part.From, part.To)
 		req.Header.Add("Range", rangeValue)
 
-		dest := fmt.Sprintf("%s%s_%d", configloader.TempDir, d.Id, cursor)
+		fileName := fmt.Sprintf("%s_%d", d.Id, cursor)
+		dest := path.Join(configloader.TempDir, fileName)
 		out, err := os.Create(dest)
 		writer := &ProgressWriter{
 			part:   d.Parts[0],
@@ -190,10 +192,11 @@ func (d *Download) saveOutput() error {
 
 	for p := range d.Parts {
 		filename := fmt.Sprintf("%s_%d", d.Id, p)
-		tempFile, err := os.Open(configloader.TempDir + filename)
+		tempFile, err := os.Open(path.Join(configloader.TempDir, filename))
 		if err != nil {
 			return err
 		}
+		defer os.Remove(path.Join(configloader.TempDir, filename))
 		defer tempFile.Close()
 
 		io.Copy(output, tempFile)
@@ -220,5 +223,5 @@ func getDestFileName(url, contentType, contentDisposition string) (string, error
 		}
 	}
 
-	return configloader.DestFolder + filename, nil
+	return path.Join(configloader.DestFolder, filename), nil
 }
