@@ -12,7 +12,7 @@ type ListView struct {
 	onSelect func(selected string)
 }
 
-func New(theme *material.Theme, ctx *layout.Context, items []*download.Download) ListView {
+func New(theme *material.Theme, items []*download.Download) ListView {
 	return ListView{
 		items: items,
 	}
@@ -20,4 +20,10 @@ func New(theme *material.Theme, ctx *layout.Context, items []*download.Download)
 
 func (lv *ListView) SetOnSelect(cb func(selected string)) {
 	lv.onSelect = cb
+}
+
+func (lv *ListView) Layout(gtx layout.Context) layout.Dimensions {
+	return layout.Flex{
+		Axis: layout.Vertical,
+	}.Layout(gtx, layout.Rigid(layout.Spacer{Width: 10}.Layout))
 }

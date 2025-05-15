@@ -6,12 +6,15 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
+
+	"gioui.org/unit"
 )
 
 var DestFolder string
 var TempDir string
 var MaxThreads int64 = 4
 var ItemCategories []string = []string{"All", "Documents", "Media", "Archive"}
+var Margin = unit.Dp(10)
 
 type Config struct {
 	MaxThreads int64 `json:"maxThreads"`

@@ -9,5 +9,4 @@ func main() {
 	log.Println("Started Downmann")
 
 	ui.New()
-
 }
